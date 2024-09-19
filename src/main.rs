@@ -16,15 +16,15 @@ mod cli;
 fn main() {
     let args = cli::parse_cli();
 
-    let mut config = util::Config::default().unwrap();
+    let mut gctx = util::GlobalContext::default().unwrap();
 
-    config
+    gctx
         .configure(0, false, None, false, false, false, &None, &[], &[])
         .unwrap();
 
-    let root_manifest = find_root_manifest_for_wd(config.cwd()).unwrap();
+    let root_manifest = find_root_manifest_for_wd(gctx.cwd()).unwrap();
 
-    let ws = core::Workspace::new(&root_manifest, &config).unwrap();
+    let ws = core::Workspace::new(&root_manifest, &gctx).unwrap();
 
     let target_dir = root_manifest
         .parent()
@@ -40,7 +40,7 @@ fn main() {
     let targets = &[CompileKind::Target(
         CompileTarget::new("wasm32-unknown-unknown").unwrap(),
     )];
-    let target_data = RustcTargetData::new(&ws, targets).unwrap();
+    let mut target_data = RustcTargetData::new(&ws, targets).unwrap();
 
     let cli_features = CliFeatures::new_all(false);
 
@@ -48,19 +48,20 @@ fn main() {
 
     let ws_resolve = ops::resolve_ws_with_opts(
         &ws,
-        &target_data,
+        &mut target_data,
         targets,
         &cli_features,
         &specs,
         HasDevUnits::No,
         ForceAllTargets::No,
+        false,
     )
     .unwrap();
 
     let jobs = None;
     let compile_mode = CompileMode::Build;
     let mut build_config = BuildConfig::new(
-        &config,
+        &gctx,
         jobs,
         false,
         &["wasm32-unknown-unknown".to_string()],
@@ -95,9 +96,8 @@ fn main() {
         ),
         target_rustdoc_args: None,
         target_rustc_args: None,
-        local_rustdoc_args: None,
         rustdoc_document_private_items: false,
-        honor_rust_version: false,
+        honor_rust_version: Some(false),
         target_rustc_crate_types: None,
     };
 

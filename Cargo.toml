@@ -23,7 +23,7 @@ name = "android.permission.BLUETOOTH_SCAN"
 name = "android.permission.BLUETOOTH_CONNECT"
 
 [dependencies]
-cargo = "0.62.0"
+cargo = "0.82.0"
 devserver_lib = {version = "0.4", default-features = false }
 #devserver_lib = { path = "../devserver/devserver_lib" }
 fs_extra = "1.2"
